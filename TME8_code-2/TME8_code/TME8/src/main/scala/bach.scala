@@ -31,10 +31,13 @@ class BachActor extends Actor {
 def receive = {
     case "START" => {
       //println("start")
-     // play(exemple)
+      //play(exemple)
+     // play(canon(exemple, 100))
       //println(duration(exemple))
-      play(canon(repeat(exemple, 3),20))
-      //play(voix2)
+      //play(canon(repeat(exemple, 3),20))
+      //play(voix1);
+      //play(concat_mo(exemple, exemple))
+      play(exemple2)
     }
        
 }
@@ -44,9 +47,9 @@ def receive = {
 //Question 1
 // val exemple = ???
 
-val exemple = Parallel ( List ( Sequential ( List ( Note (60 , 1000 , 100 ) , Note (64 , 500 , 100 ), Note (62 , 500 , 100 ),Rest (1000) , Note (67 , 1000 , 106 )      ) ),
+val exemple = Parallel ( List ( Sequential ( List ( Note (60 , 1000 , 100 ) , Note (64 , 500 , 100 ), Note (62 , 500 , 100 ),Rest (1000) , Note (68 , 1000 , 100 )) ),
 
-Sequential ( List ( Note (52 , 2000 , 100 ) , Note (55 , 1000 , 100 ), Note (60 , 1000 , 100 )
+Sequential ( List ( Note (52 , 2000 , 100 ) , Note (55 , 1000 , 100 ), Note (55 , 1000 , 100 )
            )
      )))
 
@@ -150,7 +153,7 @@ obj match {
 //canon
   def canon(obj:ObjectMusical, n:Int):ObjectMusical =
 (obj, n) match {
-    case (o, 0) => Parallel ( List (o, o))
+    case (o, 1) => Parallel ( List (o, o))
     case (Note(p,d,v), n) => Parallel (List(Note(p,d,v), Sequential(List(Rest(n), Note(p,d,v)))))
     case (Rest(d),n) => Parallel (List(Rest(d), Sequential (List(Rest(n), Rest(d)))))
     case (Parallel(l), n) => Parallel (List(Parallel(l), Sequential(List(Rest(n), Parallel(l)))))
@@ -158,7 +161,15 @@ obj match {
 }
 
 //concat_mo
-  //def concat_mo()
+  def concat_mo(obj1:ObjectMusical, obj2:ObjectMusical):ObjectMusical =
+    Sequential(List(obj1, obj2))
+
+    val exemple2 =  canon( repeat( exemple, 3), 1000)
+
+   // val exemple = Parallel ( List ( Sequential ( List ( Note (60 , 1000 , 100 ) , Note (64 , 500 , 100 ), Note (62 , 500 , 100 ),Rest (1000) , Note (68 , 1000 , 100 )) ),
+//Sequential ( List ( Note (52 , 2000 , 100 ) , Note (55 , 1000 , 100 ), Note (55 , 1000 , 100 )
+  //         )
+    // )))
 
 /*
 //Question 5
