@@ -1,4 +1,3 @@
-
 package upmc.akka.culto
 
 import math._
@@ -17,8 +16,8 @@ case class Rest (dur:Int) extends SimpleObjectMusical
 case class Sequential (elements:List[ObjectMusical]) extends ComposeObjectMusical
 case class Parallel (elements:List[ObjectMusical]) extends ComposeObjectMusical
 
-case class MidiNote (pitch:Int, vel:Int, dur:Int, at:Int) 
-  
+case class MidiNote (pitch:Int, vel:Int, dur:Int, at:Int)
+ 
 /////////////////////////////////////////////////
 
 class BachActor extends Actor {
@@ -31,9 +30,13 @@ class BachActor extends Actor {
 
 def receive = {
     case "START" => {
-      println("start")
+      //println("start")
+     // play(exemple)
+      //println(duration(exemple))
+      play(canon(repeat(exemple, 3),20))
+      //play(voix2)
     }
-        
+       
 }
 
 /////////////////////////////////////////////////
@@ -41,8 +44,11 @@ def receive = {
 //Question 1
 // val exemple = ???
 
-val exemple = Nil
+val exemple = Parallel ( List ( Sequential ( List ( Note (60 , 1000 , 100 ) , Note (64 , 500 , 100 ), Note (62 , 500 , 100 ),Rest (1000) , Note (67 , 1000 , 106 )      ) ),
 
+Sequential ( List ( Note (52 , 2000 , 100 ) , Note (55 , 1000 , 100 ), Note (60 , 1000 , 100 )
+           )
+     )))
 
 //Question 2
  
@@ -52,7 +58,7 @@ val exemple = Nil
     case Note(p,d,v) => d
     case Rest(d) => d
     case Sequential (l) => (l.map(duration)).foldLeft(0)(_+_)
-    case Parallel (l) => (l.map(duration)).foldLeft(0)(math.max)  
+    case Parallel (l) => (l.map(duration)).foldLeft(0)(math.max) 
   }
 
 
@@ -65,7 +71,7 @@ val exemple = Nil
     remote ! MidiNote(p,v,d,at)
   }
 
-  
+ 
   def play_midi (obj:ObjectMusical, at:Int): Unit =
   obj match {
     case Note(p,d,v) => send_a_note (p,d,v,at)
@@ -74,8 +80,8 @@ val exemple = Nil
                         l.foreach(n=>{play_midi(n,date); date = date + duration(n)})}
     case Parallel (l) => l.foreach(n=>play_midi(n,at))
   }
-  
-/*
+ 
+
  // Copy un objet musical
   def copy (obj:ObjectMusical):ObjectMusical =
   obj match {
@@ -115,7 +121,7 @@ obj match {
   case Sequential (l) => Sequential (l.map(transpose (_,n)))
 }
 
-// mirror de obj au tour du center c 
+// mirror de obj au tour du center c
   def mirror (obj:ObjectMusical, c:Int ):ObjectMusical =
 obj match {
   case Note(p,d,v) => Note(c - (p - c),d,v)
@@ -124,17 +130,41 @@ obj match {
   case Sequential (l) => Sequential (l.map(mirror (_,c)))
 }
 
-// retrograde un obj  
+// retrograde un obj 
   def retrograde (obj:ObjectMusical):ObjectMusical =
 obj match {
   case Sequential (l) => Sequential (l.reverse.map(retrograde))
   case o => o
 }
 
+// repeat
+  def repeat (obj:ObjectMusical, n:Int):ObjectMusical =
+(obj, n) match {
+  case (_, 0) => obj
+  case (Note(p,d,v), _) => Sequential (List(Note(p,d,v), repeat(Note(p,d,v), (n-1))))
+  case (Rest(d),_) => Sequential (List(Rest(d), repeat(Rest(d), (n-1))))
+  case (Parallel(l), _) => Sequential (List(Parallel (l), repeat(Parallel (l), (n-1))))
+  case (Sequential(l), _) => Sequential (List(Sequential (l), repeat(Sequential (l), (n-1))))
+}
+
+//canon
+  def canon(obj:ObjectMusical, n:Int):ObjectMusical =
+(obj, n) match {
+    case (o, 0) => Parallel ( List (o, o))
+    case (Note(p,d,v), n) => Parallel (List(Note(p,d,v), Sequential(List(Rest(n), Note(p,d,v)))))
+    case (Rest(d),n) => Parallel (List(Rest(d), Sequential (List(Rest(n), Rest(d)))))
+    case (Parallel(l), n) => Parallel (List(Parallel(l), Sequential(List(Rest(n), Parallel(l)))))
+    case (Sequential(l), n) => Parallel (List(Sequential(l), Sequential(List(Rest(n),     Sequential(l)))))
+}
+
+//concat_mo
+  //def concat_mo()
+
+/*
 //Question 5
 
 
-// make a sequential avec n fois obj  
+// make a sequential avec n fois obj 
   def repeat (obj:ObjectMusical, n:Int):ObjectMusical =
   //code here
 
@@ -143,47 +173,47 @@ obj match {
   //code here
 
 
-//  Met obj1 et obj2 en seqeunce 
+//  Met obj1 et obj2 en seqeunce
   def concat (obj1:ObjectMusical, obj2:ObjectMusical):ObjectMusical =
   //code here
 */
 
 //Question 5 BACH
  val voix1 = Sequential ( List (
-  Note (60 , 750 , 106 ) , Note (62 , 250 , 108 ) , Note (63 , 250 , 108 ) , 
-  Note (64 , 250 , 109 ) , Note (65 , 250 , 109 ) , Note (66 , 250 , 110 ) , 
-  Note (67 , 1000 , 110 ) , Note (68 , 625 , 113 ) ,Note (65 , 125 , 114 ) , 
-  Note (61 , 125 , 112 ) , Note (60 , 125 , 112 ) , Note (59 , 500 , 112 ) , 
-  Rest (500) , Rest (500) , Note (67 , 1000 , 109 ) ,Note (66 , 1000 , 108 ) , 
-  Note (65 , 1000 , 106 ) , Note (64 , 1000 , 106 ) , Note (63 , 1000 , 106 ) , 
-  Note (62 , 750 , 106 ) , Note (61 , 250 , 106 ) , Note (58 , 250 , 106 ) , 
+  Note (60 , 750 , 106 ) , Note (62 , 250 , 108 ) , Note (63 , 250 , 108 ) ,
+  Note (64 , 250 , 109 ) , Note (65 , 250 , 109 ) , Note (66 , 250 , 110 ) ,
+  Note (67 , 1000 , 110 ) , Note (68 , 625 , 113 ) ,Note (65 , 125 , 114 ) ,
+  Note (61 , 125 , 112 ) , Note (60 , 125 , 112 ) , Note (59 , 500 , 112 ) ,
+  Rest (500) , Rest (500) , Note (67 , 1000 , 109 ) ,Note (66 , 1000 , 108 ) ,
+  Note (65 , 1000 , 106 ) , Note (64 , 1000 , 106 ) , Note (63 , 1000 , 106 ) ,
+  Note (62 , 750 , 106 ) , Note (61 , 250 , 106 ) , Note (58 , 250 , 106 ) ,
   Note (57 , 250 , 106 ) , Note (62 , 500 , 106 ) ,Rest (1000),
   Note (67 , 1000 , 106 ) , Note (65 , 500 , 106 ) , Note (64 , 1000 , 106 )))
 
 val voix2 = Sequential (List (
   Rest (125) , Note (48 , 125 , 100 ), Note (51 , 125 , 100 ),
-  Note (55 , 125 , 100 ),Note (60 , 1000 , 100 ),Note (58 , 250 , 100 ), 
+  Note (55 , 125 , 100 ),Note (60 , 1000 , 100 ),Note (58 , 250 , 100 ),
   Note (57 , 250 , 100 ),Note (58 , 625 , 100 ),Note (52 , 125 , 100 ),
-  Note (50 , 125 , 100 ),Note (52 , 125 , 100 ),Note (53 , 125 , 100 ), 
+  Note (50 , 125 , 100 ),Note (52 , 125 , 100 ),Note (53 , 125 , 100 ),
   Note (48 , 125 , 100 ),Note (53 , 125 , 100 ),Note (55 , 125 , 100 ),
-  Note (56 , 750 , 100 ),Note (56 , 250 , 100 ),Note (55 , 250 , 100 ), 
-  Note (53 , 250 , 100 ),Note (51 , 625 , 100 ),Note (51 , 125 , 100 ), 
+  Note (56 , 750 , 100 ),Note (56 , 250 , 100 ),Note (55 , 250 , 100 ),
+  Note (53 , 250 , 100 ),Note (51 , 625 , 100 ),Note (51 , 125 , 100 ),
   Note (53 , 125 , 100 ),Note (51 , 125 , 100 ),Note (50 , 250 , 100 ),
-  Note (48 , 250 , 100 ),Note (49 , 500 , 100 ), Rest (250) ,Note (50 , 250 , 100 ), 
+  Note (48 , 250 , 100 ),Note (49 , 500 , 100 ), Rest (250) ,Note (50 , 250 , 100 ),
   Note (51 , 250 , 100 ),Note (50 , 250 , 100 ),Note (48 , 125 , 100 ),
-  Note (47 , 125 , 100 ),Note (48 , 125 , 100 ),Note (47 , 125 , 100 ), 
+  Note (47 , 125 , 100 ),Note (48 , 125 , 100 ),Note (47 , 125 , 100 ),
   Note (48 , 125 , 100 ),Note (50 , 125 , 100 ),Note (48 , 125 , 100 ),
-  Note (46 , 125 , 100 ),Note (45 , 125 , 100 ),Note (43 , 125 , 100 ), 
+  Note (46 , 125 , 100 ),Note (45 , 125 , 100 ),Note (43 , 125 , 100 ),
   Note (45 , 125 , 100 ),Note (46 , 125 , 100 ),Note (48 , 125 , 100 ),
-  Note (45 , 125 , 100 ),Note (46 , 125 , 100 ),Note (48 , 125 , 100 ), 
-  Note (50 , 250 , 100 ),Note (60 , 500 , 100 ),Note (58 , 125 , 100 ), 
+  Note (45 , 125 , 100 ),Note (46 , 125 , 100 ),Note (48 , 125 , 100 ),
+  Note (50 , 250 , 100 ),Note (60 , 500 , 100 ),Note (58 , 125 , 100 ),
   Note (57 , 125 , 100 ),Note (58 , 250 , 100 ),Note (55 , 250 , 100 ),
-  Note (52 , 250 , 100 ),Note (57 , 125 , 100 ),Note (55 , 125 , 100 ), 
+  Note (52 , 250 , 100 ),Note (57 , 125 , 100 ),Note (55 , 125 , 100 ),
   Note (54 , 250 , 100 ),Note (55 , 125 , 100 ),Note (57 , 125 , 100 ),
-  Note (58 , 250 , 100 ), Note (49 , 250 , 100 ),Note (50 , 500 , 100 ), 
+  Note (58 , 250 , 100 ), Note (49 , 250 , 100 ),Note (50 , 500 , 100 ),
   Rest (500) , Rest (250) , Note (50 , 375 , 100 ),Note (53 , 125 , 100 ),
   Note (52 , 125 , 100 ),
-  Note (50 , 125 , 100 ),Note (49 , 125 , 100 ),Note (50 , 125 , 100 ), 
+  Note (50 , 125 , 100 ),Note (49 , 125 , 100 ),Note (50 , 125 , 100 ),
   Note (52 , 125 , 100 ),Note (53 , 125 , 100 ),Note (55 , 125 , 100 ),
   Note (58 , 125 , 100 ),Note (57 , 125 , 100 ),Note (55 , 125 , 100 )))
 
@@ -202,4 +232,3 @@ object bach extends App {
   val localActor = system.actorOf(Props[BachActor], name = "Bach")
   localActor ! "START"
 }
-
