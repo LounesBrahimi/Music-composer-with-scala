@@ -37,7 +37,10 @@ def receive = {
       //play(canon(repeat(exemple, 3),20))
       //play(voix1);
       //play(concat_mo(exemple, exemple))
-      play(exemple2)
+     // play(voix1)
+      //play(voix2)
+      play(canon_Bach)
+    // play(roiVoix1)
     }
        
 }
@@ -166,28 +169,8 @@ obj match {
 
     val exemple2 =  canon( repeat( exemple, 3), 1000)
 
-   // val exemple = Parallel ( List ( Sequential ( List ( Note (60 , 1000 , 100 ) , Note (64 , 500 , 100 ), Note (62 , 500 , 100 ),Rest (1000) , Note (68 , 1000 , 100 )) ),
-//Sequential ( List ( Note (52 , 2000 , 100 ) , Note (55 , 1000 , 100 ), Note (55 , 1000 , 100 )
-  //         )
-    // )))
 
-/*
 //Question 5
-
-
-// make a sequential avec n fois obj 
-  def repeat (obj:ObjectMusical, n:Int):ObjectMusical =
-  //code here
-
-// make obj en parallele avec lui meme avec un decalage de n ms.
-  def canon (obj:ObjectMusical, n:Int):ObjectMusical =
-  //code here
-
-
-//  Met obj1 et obj2 en seqeunce
-  def concat (obj1:ObjectMusical, obj2:ObjectMusical):ObjectMusical =
-  //code here
-*/
 
 //Question 5 BACH
  val voix1 = Sequential ( List (
@@ -228,11 +211,24 @@ val voix2 = Sequential (List (
   Note (52 , 125 , 100 ),Note (53 , 125 , 100 ),Note (55 , 125 , 100 ),
   Note (58 , 125 , 100 ),Note (57 , 125 , 100 ),Note (55 , 125 , 100 )))
 
-/*
+val roiVoix1 = Sequential (List (voix1, transpose(voix1 , 2), transpose(transpose(voix1 , 2) , 2), 
+                                  transpose(transpose(transpose(voix1 , 2) , 2) , 2), 
+                                  transpose(transpose(transpose(transpose(voix1 , 2) , 2) , 2) , 2), 
+                                  transpose(transpose(transpose(transpose(transpose(voix1 , 2) , 2) , 2) , 2) , 2)));
+val deuxiemeVoix = Sequential ( List (voix2, transpose(voix1 , 1), transpose(transpose(voix1 , 1) , 1), 
+                                        transpose(transpose(transpose(voix1 , 1) , 1) , 1), 
+                                          transpose(transpose(transpose(voix1 , 1) , 1) , 1), 
+                                            transpose(transpose(transpose(voix1 , 1) , 1) , 1)));
+val mesureVoix2 = Sequential ( List (Rest (2000), transpose(deuxiemeVoix, 7)));
+
 def canon_Bach ():ObjectMusical = {
-    // ????
+    Parallel ( List (
+                       roiVoix1,
+                       deuxiemeVoix,
+                       mesureVoix2
+
+    ))
   }
-*/
 }
 //////////////////////////////////////////////////
 
